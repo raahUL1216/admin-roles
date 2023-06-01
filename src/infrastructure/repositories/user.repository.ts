@@ -1,22 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { UserM } from '../../domain/model/user';
-import { UserRepository } from '../../domain/repositories/adminRepository.interface';
-import { User } from '../entities/user.entity';
+import { Repository } from "typeorm";
+import { User } from "../entities/user.entity";
+import { UserRepository } from "../../domain/repositories/userRepositary.interface";
+import { UserM } from "../../domain/model/user";
 
 @Injectable()
 export class DatabaseUserRepository implements UserRepository {
   constructor(
     @InjectRepository(User)
-    private readonly userEntityRepository: Repository<User>,
+    private readonly userEntityRepository: Repository<User>
   ) {}
-  async updateRefreshToken(username: string, refreshToken: string): Promise<void> {
+  async updateRefreshToken(
+    username: string,
+    refreshToken: string
+  ): Promise<void> {
     await this.userEntityRepository.update(
       {
         username: username,
       },
-      { hach_refresh_token: refreshToken },
+      { hash_refresh_token: refreshToken }
     );
   }
   async getUserByUsername(username: string): Promise<UserM> {
@@ -35,7 +38,7 @@ export class DatabaseUserRepository implements UserRepository {
       {
         username: username,
       },
-      { last_login: () => 'CURRENT_TIMESTAMP' },
+      { last_login: () => "CURRENT_TIMESTAMP" }
     );
   }
 
@@ -48,17 +51,13 @@ export class DatabaseUserRepository implements UserRepository {
     adminUser.createDate = adminUserEntity.createdate;
     adminUser.updatedDate = adminUserEntity.updateddate;
     adminUser.lastLogin = adminUserEntity.last_login;
-    adminUser.hashRefreshToken = adminUserEntity.hach_refresh_token;
+    adminUser.hashRefreshToken = adminUserEntity.hash_refresh_token;
 
     return adminUser;
   }
 
   private toUserEntity(adminUser: UserM): User {
-    const adminUserEntity: User = new User();
-
-    adminUserEntity.username = adminUser.username;
-    adminUserEntity.password = adminUser.password;
-    adminUserEntity.last_login = adminUser.lastLogin;
+    const adminUserEntity: User = new User(adminUser);
 
     return adminUserEntity;
   }

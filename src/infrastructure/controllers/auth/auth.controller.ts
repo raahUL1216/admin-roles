@@ -16,17 +16,16 @@ import { LogoutUseCases } from '../../../usecases/auth/logout.usecases';
 
 import { ApiResponseType } from '../../common/swagger/response.decorator';
 
-import { User } from '../../../domain/entity/user.entity';
-import { validate } from 'class-validator';
+import { User } from "../../entities/user.entity";
+import { validate } from "class-validator";
 
-
-@Controller('auth')
-@ApiTags('auth')
+@Controller("auth")
+@ApiTags("auth")
 @ApiResponse({
   status: 401,
-  description: 'No authorization token was found',
+  description: "No authorization token was found",
 })
-@ApiResponse({ status: 500, description: 'Internal error' })
+@ApiResponse({ status: 500, description: "Internal error" })
 @ApiExtraModels(IsAuthPresenter)
 export class AuthController {
   constructor(
@@ -35,58 +34,69 @@ export class AuthController {
     @Inject(UsecasesProxyModule.LOGOUT_USECASES_PROXY)
     private readonly logoutUsecaseProxy: UseCaseProxy<LogoutUseCases>,
     @Inject(UsecasesProxyModule.IS_AUTHENTICATED_USECASES_PROXY)
-    private readonly isAuthUsecaseProxy: UseCaseProxy<IsAuthenticatedUseCases>,
+    private readonly isAuthUsecaseProxy: UseCaseProxy<IsAuthenticatedUseCases>
   ) {}
 
-  @Post('login')
+  @Post("login")
   @UseGuards(LoginGuard)
   @ApiBearerAuth()
   @ApiBody({ type: AuthLoginDto })
-  @ApiOperation({ description: 'login' })
+  @ApiOperation({ description: "login" })
   async login(@Body() auth: AuthLoginDto, @Request() request: any) {
-    const accessTokenCookie = await this.loginUsecaseProxy.getInstance().getCookieWithJwtToken(auth.username);
-    const refreshTokenCookie = await this.loginUsecaseProxy.getInstance().getCookieWithJwtRefreshToken(auth.username);
-    request.res.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
-    return 'Login successful';
+    const accessTokenCookie = await this.loginUsecaseProxy
+      .getInstance()
+      .getCookieWithJwtToken(auth.username);
+    const refreshTokenCookie = await this.loginUsecaseProxy
+      .getInstance()
+      .getCookieWithJwtRefreshToken(auth.username);
+    request.res.setHeader("Set-Cookie", [
+      accessTokenCookie,
+      refreshTokenCookie,
+    ]);
+    return "Login successful";
   }
 
-  @Post('logout')
+  @Post("logout")
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ description: 'logout' })
+  @ApiOperation({ description: "logout" })
   async logout(@Request() request: any) {
     const cookie = await this.logoutUsecaseProxy.getInstance().execute();
-    request.res.setHeader('Set-Cookie', cookie);
-    return 'Logout successful';
+    request.res.setHeader("Set-Cookie", cookie);
+    return "Logout successful";
   }
 
-  @Get('is_authenticated')
+  @Get("is_authenticated")
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ description: 'is_authenticated' })
+  @ApiOperation({ description: "is_authenticated" })
   @ApiResponseType(IsAuthPresenter, false)
   async isAuthenticated(@Req() request: any) {
-    const user = await this.isAuthUsecaseProxy.getInstance().execute(request.user.username);
+    const user = await this.isAuthUsecaseProxy
+      .getInstance()
+      .execute(request.user.username);
     const response = new IsAuthPresenter();
     response.username = user.username;
     return response;
   }
 
-  @Get('refresh')
+  @Get("refresh")
   @UseGuards(JwtRefreshGuard)
   @ApiBearerAuth()
   async refresh(@Req() request: any) {
-    const accessTokenCookie = await this.loginUsecaseProxy.getInstance().getCookieWithJwtToken(request.user.username);
-    request.res.setHeader('Set-Cookie', accessTokenCookie);
-    return 'Refresh successful';
+    const accessTokenCookie = await this.loginUsecaseProxy
+      .getInstance()
+      .getCookieWithJwtToken(request.user.username);
+    request.res.setHeader("Set-Cookie", accessTokenCookie);
+    return "Refresh successful";
   }
 
-  @Get('register')
-  @UseGuards(JwtRefreshGuard)
-  @ApiBearerAuth()
-  async signUp(@Req() request: any) {
-    const { name, email, password } = request.body;
-    const user = new User({ name, email, password });
-    const errors = await validate(user);
-    // save and login
-  }
+  //   @Get('register')
+  //   @UseGuards(JwtRefreshGuard)
+  //   @ApiBearerAuth()
+  //   async signUp(@Req() request: any) {
+  //     const { name, email, password } = request.body;
+  //     const user = new User({ name, email, password });
+  //     const errors = await validate(user);
+  //     // save and login
+  //   }
 }

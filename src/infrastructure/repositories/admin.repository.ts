@@ -1,61 +1,44 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { TodoRepository } from '../../domain/repositories/todoRepository.interface';
-import { Todo } from '../entities/todo.entity';
+import { Repository } from "typeorm";
+import { AdminRepository } from "../../domain/repositories/adminRepository.interface";
+import { User } from "../entities/user.entity";
+import { Role } from "../../enums/role.enum";
+import { Group } from "../entities/group.entity";
 
 @Injectable()
-export class DatabaseAdminRepository implements TodoRepository {
+export class DatabaseAdminRepository implements AdminRepository {
   constructor(
-    @InjectRepository(Todo)
-    private readonly todoEntityRepository: Repository<Todo>,
+    @InjectRepository(User)
+    private readonly adminEntityRepository: Repository<User>,
+    @InjectRepository(Group)
+    private readonly groupEntityRepository: Repository<Group>
   ) {}
 
-  async updateContent(id: number, isDone: boolean): Promise<void> {
-    await this.todoEntityRepository.update(
-      {
-        id: id,
-      },
-      { is_done: isDone },
-    );
-  }
-  async insert(todo: TodoM): Promise<TodoM> {
-    const todoEntity = this.toTodoEntity(todo);
-    const result = await this.todoEntityRepository.insert(todoEntity);
-    return this.toTodo(result.generatedMaps[0] as Todo);
-    console.log(result.generatedMaps);
-  }
-  async findAll(): Promise<TodoM[]> {
-    const todosEntity = await this.todoEntityRepository.find();
-    return todosEntity.map((todoEntity) => this.toTodo(todoEntity));
-  }
-  async findById(id: number): Promise<TodoM> {
-    const todoEntity = await this.todoEntityRepository.findOneOrFail(id);
-    return this.toTodo(todoEntity);
-  }
-  async deleteById(id: number): Promise<void> {
-    await this.todoEntityRepository.delete({ id: id });
+  async createAdmin(user: User): Promise<void> {
+    const adminUser = new User(user);
+    adminUser.role = Role.Admin;
+
+    await this.adminEntityRepository.save(adminUser);
   }
 
-  private toTodo(todoEntity: Todo): TodoM {
-    const todo: TodoM = new TodoM();
+  async createUser(user: User): Promise<void> {
+    const cUser = new User(user);
+    cUser.role = Role.User;
 
-    todo.id = todoEntity.id;
-    todo.content = todoEntity.content;
-    todo.isDone = todoEntity.is_done;
-    todo.createdDate = todoEntity.created_date;
-    todo.updatedDate = todoEntity.updated_date;
-
-    return todo;
+    await this.adminEntityRepository.save(cUser);
   }
 
-  private toTodoEntity(todo: TodoM): Todo {
-    const todoEntity: Todo = new Todo();
+  async createUserGroup(group_name: string): Promise<number> {
+    const group = new Group(group_name);
 
-    todoEntity.id = todo.id;
-    todoEntity.content = todo.content;
-    todoEntity.is_done = todo.isDone;
+    const cGroup = await this.groupEntityRepository.save(group);
 
-    return todoEntity;
+    return cGroup.id;
+  }
+
+  async addUserToGroup(role_id: number, user_ids: number[]): Promise<void> {
+    // const group = new Group();
+    // const cGroup = await this.groupEntityRepository.save(group);
   }
 }
