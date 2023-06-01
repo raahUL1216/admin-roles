@@ -1,64 +1,86 @@
-import { DynamicModule, Module } from '@nestjs/common';
-import { addTodoUseCases } from '../../usecases/todo/addTodo.usecases';
-import { deleteTodoUseCases } from '../../usecases/todo/deleteTodo.usecases';
-import { GetTodoUseCases } from '../../usecases/todo/getTodo.usecases';
-import { getTodosUseCases } from '../../usecases/todo/getTodos.usecases';
-import { updateTodoUseCases } from '../../usecases/todo/updateTodo.usecases';
-import { IsAuthenticatedUseCases } from '../../usecases/auth/isAuthenticated.usecases';
-import { LoginUseCases } from '../../usecases/auth/login.usecases';
-import { LogoutUseCases } from '../../usecases/auth/logout.usecases';
+import { AdminRepository } from "./../../domain/repositories/adminRepository.interface";
+import { DynamicModule, Module } from "@nestjs/common";
+import { IsAuthenticatedUseCases } from "../../usecases/auth/isAuthenticated.usecases";
+import { LoginUseCases } from "../../usecases/auth/login.usecases";
+import { LogoutUseCases } from "../../usecases/auth/logout.usecases";
 
-import { ExceptionsModule } from '../exceptions/exceptions.module';
-import { LoggerModule } from '../logger/logger.module';
-import { LoggerService } from '../logger/logger.service';
+import { ExceptionsModule } from "../exceptions/exceptions.module";
+import { LoggerModule } from "../logger/logger.module";
+import { LoggerService } from "../logger/logger.service";
 
-import { BcryptModule } from '../services/bcrypt/bcrypt.module';
-import { BcryptService } from '../services/bcrypt/bcrypt.service';
-import { JwtModule } from '../services/jwt/jwt.module';
-import { JwtTokenService } from '../services/jwt/jwt.service';
-import { RepositoriesModule } from '../repositories/repositories.module';
+import { BcryptModule } from "../services/bcrypt/bcrypt.module";
+import { BcryptService } from "../services/bcrypt/bcrypt.service";
+import { JwtModule } from "../services/jwt/jwt.module";
+import { JwtTokenService } from "../services/jwt/jwt.service";
+import { RepositoriesModule } from "../repositories/repositories.module";
 
-import { DatabaseTodoRepository } from '../repositories/todo.repository';
-import { DatabaseUserRepository } from '../repositories/user.repository';
+import { DatabaseUserRepository } from "../repositories/user.repository";
 
-import { EnvironmentConfigModule } from '../config/environment-config/environment-config.module';
-import { EnvironmentConfigService } from '../config/environment-config/environment-config.service';
-import { UseCaseProxy } from './usecases-proxy';
+import { EnvironmentConfigModule } from "../config/environment-config/environment-config.module";
+import { EnvironmentConfigService } from "../config/environment-config/environment-config.service";
+import { createAdminUseCases } from "../../usecases/admin/createAdmin.usecases";
+import { DatabaseAdminRepository } from "../repositories/admin.repository";
+import { createUserGroupUseCases } from "../../usecases/admin/createUserGroup.usecases";
+import { addUserToGroupUseCases } from "../../usecases/admin/addUserToGroup.usecases";
+
+import { UseCaseProxy } from "./usecases-proxy";
+import { AdminModule } from "../controllers/admin.module";
 
 @Module({
-  imports: [LoggerModule, JwtModule, BcryptModule, EnvironmentConfigModule, RepositoriesModule, ExceptionsModule],
+  imports: [
+    LoggerModule,
+    JwtModule,
+    BcryptModule,
+    EnvironmentConfigModule,
+    RepositoriesModule,
+    ExceptionsModule,
+  ],
 })
 export class UsecasesProxyModule {
   // Auth
-  static LOGIN_USECASES_PROXY = 'LoginUseCasesProxy';
-  static IS_AUTHENTICATED_USECASES_PROXY = 'IsAuthenticatedUseCasesProxy';
-  static LOGOUT_USECASES_PROXY = 'LogoutUseCasesProxy';
+  static LOGIN_USECASES_PROXY = "LoginUseCasesProxy";
+  static IS_AUTHENTICATED_USECASES_PROXY = "IsAuthenticatedUseCasesProxy";
+  static LOGOUT_USECASES_PROXY = "LogoutUseCasesProxy";
 
-  static GET_TODO_USECASES_PROXY = 'getTodoUsecasesProxy';
-  static GET_TODOS_USECASES_PROXY = 'getTodosUsecasesProxy';
-  static POST_TODO_USECASES_PROXY = 'postTodoUsecasesProxy';
-  static DELETE_TODO_USECASES_PROXY = 'deleteTodoUsecasesProxy';
-  static PUT_TODO_USECASES_PROXY = 'putTodoUsecasesProxy';
+  static CREATE_ADMIN_USECASES_PROXY = "createAdminUsecasesProxy";
+  static CREATE_ADMIN__GROUP_USECASES_PROXY = "createAdminGroupUsecasesProxy";
+  static ADD_ADMIN_TO_GROUP_USECASES_PROXY = "addAdminToGroupUsecasesProxy";
 
   static register(): DynamicModule {
     return {
       module: UsecasesProxyModule,
       providers: [
         {
-          inject: [LoggerService, JwtTokenService, EnvironmentConfigService, DatabaseUserRepository, BcryptService],
+          inject: [
+            LoggerService,
+            JwtTokenService,
+            EnvironmentConfigService,
+            DatabaseUserRepository,
+            BcryptService,
+          ],
           provide: UsecasesProxyModule.LOGIN_USECASES_PROXY,
           useFactory: (
             logger: LoggerService,
             jwtTokenService: JwtTokenService,
             config: EnvironmentConfigService,
             userRepo: DatabaseUserRepository,
-            bcryptService: BcryptService,
-          ) => new UseCaseProxy(new LoginUseCases(logger, jwtTokenService, config, userRepo, bcryptService)),
+            bcryptService: BcryptService
+          ) =>
+            new UseCaseProxy(
+              new LoginUseCases(
+                logger,
+                jwtTokenService,
+                config,
+                userRepo,
+                bcryptService
+              )
+            ),
         },
         {
           inject: [DatabaseUserRepository],
           provide: UsecasesProxyModule.IS_AUTHENTICATED_USECASES_PROXY,
-          useFactory: (userRepo: DatabaseUserRepository) => new UseCaseProxy(new IsAuthenticatedUseCases(userRepo)),
+          useFactory: (userRepo: DatabaseUserRepository) =>
+            new UseCaseProxy(new IsAuthenticatedUseCases(userRepo)),
         },
         {
           inject: [],
@@ -66,43 +88,31 @@ export class UsecasesProxyModule {
           useFactory: () => new UseCaseProxy(new LogoutUseCases()),
         },
         {
-          inject: [DatabaseTodoRepository],
-          provide: UsecasesProxyModule.GET_TODO_USECASES_PROXY,
-          useFactory: (todoRepository: DatabaseTodoRepository) => new UseCaseProxy(new GetTodoUseCases(todoRepository)),
+          inject: [DatabaseAdminRepository],
+          provide: UsecasesProxyModule.CREATE_ADMIN_USECASES_PROXY,
+          useFactory: (adminRepo: DatabaseAdminRepository) =>
+            new UseCaseProxy(new createAdminUseCases(adminRepo)),
         },
         {
-          inject: [DatabaseTodoRepository],
-          provide: UsecasesProxyModule.GET_TODOS_USECASES_PROXY,
-          useFactory: (todoRepository: DatabaseTodoRepository) => new UseCaseProxy(new getTodosUseCases(todoRepository)),
+          inject: [DatabaseAdminRepository],
+          provide: UsecasesProxyModule.CREATE_ADMIN__GROUP_USECASES_PROXY,
+          useFactory: (adminRepo: DatabaseAdminRepository) =>
+            new UseCaseProxy(new createUserGroupUseCases(adminRepo)),
         },
         {
-          inject: [LoggerService, DatabaseTodoRepository],
-          provide: UsecasesProxyModule.POST_TODO_USECASES_PROXY,
-          useFactory: (logger: LoggerService, todoRepository: DatabaseTodoRepository) =>
-            new UseCaseProxy(new addTodoUseCases(logger, todoRepository)),
-        },
-        {
-          inject: [LoggerService, DatabaseTodoRepository],
-          provide: UsecasesProxyModule.PUT_TODO_USECASES_PROXY,
-          useFactory: (logger: LoggerService, todoRepository: DatabaseTodoRepository) =>
-            new UseCaseProxy(new updateTodoUseCases(logger, todoRepository)),
-        },
-        {
-          inject: [LoggerService, DatabaseTodoRepository],
-          provide: UsecasesProxyModule.DELETE_TODO_USECASES_PROXY,
-          useFactory: (logger: LoggerService, todoRepository: DatabaseTodoRepository) =>
-            new UseCaseProxy(new deleteTodoUseCases(logger, todoRepository)),
+          inject: [DatabaseAdminRepository],
+          provide: UsecasesProxyModule.ADD_ADMIN_TO_GROUP_USECASES_PROXY,
+          useFactory: (adminRepo: DatabaseAdminRepository) =>
+            new UseCaseProxy(new addUserToGroupUseCases(adminRepo)),
         },
       ],
       exports: [
-        UsecasesProxyModule.GET_TODO_USECASES_PROXY,
-        UsecasesProxyModule.GET_TODOS_USECASES_PROXY,
-        UsecasesProxyModule.POST_TODO_USECASES_PROXY,
-        UsecasesProxyModule.PUT_TODO_USECASES_PROXY,
-        UsecasesProxyModule.DELETE_TODO_USECASES_PROXY,
         UsecasesProxyModule.LOGIN_USECASES_PROXY,
         UsecasesProxyModule.IS_AUTHENTICATED_USECASES_PROXY,
         UsecasesProxyModule.LOGOUT_USECASES_PROXY,
+        UsecasesProxyModule.CREATE_ADMIN_USECASES_PROXY,
+        UsecasesProxyModule.CREATE_ADMIN__GROUP_USECASES_PROXY,
+        UsecasesProxyModule.ADD_ADMIN_TO_GROUP_USECASES_PROXY,
       ],
     };
   }

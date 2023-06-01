@@ -1,4 +1,5 @@
 import * as dotenv from "dotenv";
+import { join } from "path";
 import { DataSource } from "typeorm";
 
 if (process.env.NODE_ENV === "local") {
@@ -12,12 +13,14 @@ export const AdminDataSource = new DataSource({
   username: process.env.DATABASE_USER,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
-  entities: ["dist/**/*.entity{.ts,.js}", "src/**/*.entity{.ts,.js}"],
-  synchronize: false,
   schema: process.env.DATABASE_SCHEMA,
-  migrationsRun: true,
+  entities: [join(__dirname, "**", "*.entity.js")],
+  synchronize: process.env.DATABASE_SYNCHRONIZE ? true : false,
+  migrationsRun: false,
   migrationsTableName: "admin-migrations",
-  migrations: ["./src/domain/migrations/*{.ts,.js}"],
+  //   migrations: [join(__dirname, "/domain/migration/*.{js}")],
+  ssl: true,
+  extra: { ssl: { rejectUnauthorized: false } },
 });
 
 export default AdminDataSource;

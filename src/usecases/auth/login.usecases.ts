@@ -2,7 +2,7 @@ import { IBcryptService } from '../../domain/adapters/bcrypt.interface';
 import { IJwtService, IJwtServicePayload } from '../../domain/adapters/jwt.interface';
 import { JWTConfig } from '../../domain/config/jwt.interface';
 import { ILogger } from '../../domain/logger/logger.interface';
-import { UserRepository } from '../../domain/repositories/adminRepository.interface';
+import { UserRepository } from "../../domain/repositories/userRepositary.interface";
 
 export class LoginUseCases {
   constructor(
