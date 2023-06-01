@@ -90,13 +90,18 @@ export class AuthController {
     return "Refresh successful";
   }
 
-  //   @Get('register')
-  //   @UseGuards(JwtRefreshGuard)
-  //   @ApiBearerAuth()
-  //   async signUp(@Req() request: any) {
-  //     const { name, email, password } = request.body;
-  //     const user = new User({ name, email, password });
-  //     const errors = await validate(user);
-  //     // save and login
-  //   }
+  /*
+  @Post("create-user")
+  @ApiResponseType(UserPresenter, true)
+  @ApiResponse({
+    status: 201,
+    description: "The record has been successfully created.",
+  })
+  async createUser(@Body() user: UserDto) {
+    const { username, password, email, role } = user;
+    await this.createAdminUsecaseProxy
+      .getInstance()
+      .execute(username, password, email, role);
+  }
+  */
 }

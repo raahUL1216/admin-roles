@@ -10,6 +10,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from "@nestjs/common";
 import { ApiExtraModels, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { UseCaseProxy } from "../../usecases-proxy/usecases-proxy";
@@ -18,6 +19,9 @@ import { ApiResponseType } from "../../common/swagger/response.decorator";
 import { UserPresenter } from "./admin.presenter";
 import { UserDto, UserGroupDto } from "./admin.dto";
 import { createAdminUseCases } from "../../../usecases/admin/createAdmin.usecases";
+import { RoleGuard } from "src/infrastructure/common/guards/role.guard";
+import { Role } from "src/enums/role.enum";
+import { Roles } from "src/infrastructure/common/guards/role.decorator";
 
 @Controller("admin")
 @ApiTags("admin")
@@ -33,6 +37,8 @@ export class AdminController {
     private readonly addUserToGroupUseCaseProxy: UseCaseProxy<addUserToGroupUseCases>
   ) {}
 
+  @Roles(Role.SuperAdmin)
+  @UseGuards(RoleGuard)
   @Post("create-admin")
   @ApiResponseType(UserPresenter, true)
   @ApiResponse({
@@ -40,19 +46,6 @@ export class AdminController {
     description: "The record has been successfully created.",
   })
   async createAdmin(@Body() user: UserDto) {
-    const { username, password, email, role } = user;
-    await this.createAdminUsecaseProxy
-      .getInstance()
-      .execute(username, password, email, role);
-  }
-
-  @Post("create-user")
-  @ApiResponseType(UserPresenter, true)
-  @ApiResponse({
-    status: 201,
-    description: "The record has been successfully created.",
-  })
-  async createUser(@Body() user: UserDto) {
     const { username, password, email, role } = user;
     await this.createAdminUsecaseProxy
       .getInstance()
