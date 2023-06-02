@@ -5,6 +5,7 @@ import { AdminRepository } from "../../domain/repositories/adminRepository.inter
 import { User } from "../entities/user.entity";
 import { Role } from "../../enums/role.enum";
 import { Group } from "../entities/group.entity";
+import { UserGroup } from "../entities/user-group.entity";
 
 @Injectable()
 export class DatabaseAdminRepository implements AdminRepository {
@@ -12,7 +13,9 @@ export class DatabaseAdminRepository implements AdminRepository {
     @InjectRepository(User)
     private readonly adminEntityRepository: Repository<User>,
     @InjectRepository(Group)
-    private readonly groupEntityRepository: Repository<Group>
+    private readonly groupEntityRepository: Repository<Group>,
+    @InjectRepository(Group)
+    private readonly userGroupEntityRepository: Repository<UserGroup>
   ) {}
 
   async createAdmin(user: User): Promise<void> {
@@ -37,8 +40,10 @@ export class DatabaseAdminRepository implements AdminRepository {
     return cGroup.id;
   }
 
-  async addUserToGroup(role_id: number, user_ids: number[]): Promise<void> {
-    // const group = new Group();
-    // const cGroup = await this.groupEntityRepository.save(group);
+  async addUserToGroup(group_id: number, user_id: number): Promise<void> {
+    await this.userGroupEntityRepository.save({
+      group_id,
+      user_id,
+    });
   }
 }

@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 import { IsNotEmpty } from "class-validator";
 
-@Entity({ name: "user-group" })
+@Entity({ name: "groups" })
 export class Group {
   @PrimaryGeneratedColumn()
   id!: number;
