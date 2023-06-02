@@ -1,8 +1,5 @@
-import { User } from "../../infrastructure/entities/user.entity";
+import { UserM } from "../model/user";
 
 export interface AdminRepository {
-  createAdmin(user: User): Promise<void>;
-  createUser(user: User): Promise<void>;
-  createUserGroup(group_name: string): Promise<number>;
-  addUserToGroup(group_id: number, user_id: number): Promise<void>;
+  add(user: UserM): Promise<void>;
 }
