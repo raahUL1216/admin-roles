@@ -12,7 +12,7 @@ $ yarn run start
 
 # watch mode
 $ yarn run start:dev
-
-# production mode
-$ yarn run start:prod
 ```
+
+## App
+https://admin-roles-app.netlify.app
