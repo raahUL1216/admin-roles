@@ -4,6 +4,7 @@ export class addUserToGroupUseCases {
   constructor(private readonly adminRepository: AdminRepository) {}
 
   async execute(group_id: number, user_ids: number[]): Promise<void> {
-    this.adminRepository.addUserToGroup(group_id, user_ids);
+	for (const user_id of user_ids)
+    await this.adminRepository.addUserToGroup(group_id, user_id);
   }
 }
