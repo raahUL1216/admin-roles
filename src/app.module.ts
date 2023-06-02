@@ -1,4 +1,3 @@
-import { AdminModule } from "./infrastructure/controllers/admin.module";
 import { Module } from "@nestjs/common";
 import { PassportModule } from "@nestjs/passport";
 import { JwtModule } from "@nestjs/jwt";
@@ -11,6 +10,7 @@ import { EnvironmentConfigModule } from "./infrastructure/config/environment-con
 import { LocalStrategy } from "./infrastructure/common/strategies/local.strategy";
 import { JwtStrategy } from "./infrastructure/common/strategies/jwt.strategy";
 import { JwtRefreshTokenStrategy } from "./infrastructure/common/strategies/jwtRefresh.strategy";
+import { ControllersModule } from "./infrastructure/controllers/controllers.module";
 
 @Module({
   imports: [
@@ -24,7 +24,7 @@ import { JwtRefreshTokenStrategy } from "./infrastructure/common/strategies/jwtR
     BcryptModule,
     JwtServiceModule,
     EnvironmentConfigModule,
-    AdminModule,
+    ControllersModule,
   ],
   providers: [LocalStrategy, JwtStrategy, JwtRefreshTokenStrategy],
 })

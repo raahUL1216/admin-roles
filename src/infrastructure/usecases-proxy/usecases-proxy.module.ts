@@ -24,7 +24,8 @@ import { createUserGroupUseCases } from "../../usecases/admin/createUserGroup.us
 import { addUserToGroupUseCases } from "../../usecases/admin/addUserToGroup.usecases";
 
 import { UseCaseProxy } from "./usecases-proxy";
-import { AdminModule } from "../controllers/admin.module";
+import { DatabaseUserGroupRepository } from "../repositories/user-group.repository";
+import { DatabaseGroupRepository } from "../repositories/group.repository";
 
 @Module({
   imports: [
@@ -44,7 +45,7 @@ export class UsecasesProxyModule {
 
   static CREATE_ADMIN_USECASES_PROXY = "createAdminUsecasesProxy";
   static CREATE_ADMIN__GROUP_USECASES_PROXY = "createAdminGroupUsecasesProxy";
-  static ADD_ADMIN_TO_GROUP_USECASES_PROXY = "addAdminToGroupUsecasesProxy";
+  static ADD_USER_TO_GROUP_USECASES_PROXY = "addUserToGroupUsecasesProxy";
 
   static register(): DynamicModule {
     return {
@@ -94,16 +95,16 @@ export class UsecasesProxyModule {
             new UseCaseProxy(new createAdminUseCases(adminRepo)),
         },
         {
-          inject: [DatabaseAdminRepository],
+          inject: [DatabaseGroupRepository],
           provide: UsecasesProxyModule.CREATE_ADMIN__GROUP_USECASES_PROXY,
-          useFactory: (adminRepo: DatabaseAdminRepository) =>
-            new UseCaseProxy(new createUserGroupUseCases(adminRepo)),
+          useFactory: (groupRepo: DatabaseGroupRepository) =>
+            new UseCaseProxy(new createUserGroupUseCases(groupRepo)),
         },
         {
-          inject: [DatabaseAdminRepository],
-          provide: UsecasesProxyModule.ADD_ADMIN_TO_GROUP_USECASES_PROXY,
-          useFactory: (adminRepo: DatabaseAdminRepository) =>
-            new UseCaseProxy(new addUserToGroupUseCases(adminRepo)),
+          inject: [DatabaseUserGroupRepository],
+          provide: UsecasesProxyModule.ADD_USER_TO_GROUP_USECASES_PROXY,
+          useFactory: (userGroupRepo: DatabaseUserGroupRepository) =>
+            new UseCaseProxy(new addUserToGroupUseCases(userGroupRepo)),
         },
       ],
       exports: [
@@ -112,7 +113,7 @@ export class UsecasesProxyModule {
         UsecasesProxyModule.LOGOUT_USECASES_PROXY,
         UsecasesProxyModule.CREATE_ADMIN_USECASES_PROXY,
         UsecasesProxyModule.CREATE_ADMIN__GROUP_USECASES_PROXY,
-        UsecasesProxyModule.ADD_ADMIN_TO_GROUP_USECASES_PROXY,
+        UsecasesProxyModule.ADD_USER_TO_GROUP_USECASES_PROXY,
       ],
     };
   }

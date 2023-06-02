@@ -4,6 +4,7 @@ import { Repository } from "typeorm";
 import { User } from "../entities/user.entity";
 import { UserRepository } from "../../domain/repositories/userRepositary.interface";
 import { UserM } from "../../domain/model/user";
+import { Role } from "src/enums/role.enum";
 
 @Injectable()
 export class DatabaseUserRepository implements UserRepository {
@@ -11,6 +12,14 @@ export class DatabaseUserRepository implements UserRepository {
     @InjectRepository(User)
     private readonly userEntityRepository: Repository<User>
   ) {}
+
+  async add(user: UserM): Promise<void> {
+    const cUser = new User(user);
+    cUser.role = Role.User;
+
+    await this.userEntityRepository.insert(cUser);
+  }
+
   async updateRefreshToken(
     username: string,
     refreshToken: string
@@ -43,7 +52,7 @@ export class DatabaseUserRepository implements UserRepository {
   }
 
   private toUser(adminUserEntity: User): UserM {
-    const adminUser: UserM = new UserM();
+    const adminUser: UserM = new UserM(adminUserEntity);
 
     adminUser.id = adminUserEntity.id;
     adminUser.username = adminUserEntity.username;

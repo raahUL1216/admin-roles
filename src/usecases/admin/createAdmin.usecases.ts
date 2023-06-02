@@ -1,4 +1,4 @@
-import { User } from "../../infrastructure/entities/user.entity";
+import { UserM } from "src/domain/model/user";
 import { AdminRepository } from "../../domain/repositories/adminRepository.interface";
 import { Role } from "../../enums/role.enum";
 
@@ -11,8 +11,10 @@ export class createAdminUseCases {
     email: string,
     role: Role
   ): Promise<void> {
-    const adminUser = new User({ username, password, email, role });
+    const adminUser = new UserM({ username, password, email, role });
 
-    this.adminRepository.createUser(adminUser);
+    adminUser.role = Role.Admin;
+
+    this.adminRepository.add(adminUser);
   }
 }

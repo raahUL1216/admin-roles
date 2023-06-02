@@ -34,12 +34,12 @@ export class AdminController {
     @Inject(UsecasesProxyModule.CREATE_ADMIN_USECASES_PROXY)
     private readonly createUserGroupUseCaseProxy: UseCaseProxy<createUserGroupUseCases>,
     @Inject(UsecasesProxyModule.CREATE_ADMIN_USECASES_PROXY)
-    private readonly addUserToGroupUseCaseProxy: UseCaseProxy<addUserToGroupUseCases>
+    private readonly addUsersToGroupUseCaseProxy: UseCaseProxy<addUserToGroupUseCases>
   ) {}
 
   @Roles(Role.SuperAdmin)
   @UseGuards(RoleGuard)
-  @Post("create-admin")
+  @Post("create")
   @ApiResponseType(UserPresenter, true)
   @ApiResponse({
     status: 201,
@@ -52,7 +52,10 @@ export class AdminController {
       .execute(username, password, email, role);
   }
 
+  @Roles(Role.SuperAdmin)
+  @UseGuards(RoleGuard)
   @Post("create-group")
+  @ApiResponseType(UserPresenter, true)
   @ApiResponse({
     status: 201,
     description: "The record has been successfully created.",
@@ -64,14 +67,16 @@ export class AdminController {
     return group_id;
   }
 
+  @Roles(Role.SuperAdmin)
+  @UseGuards(RoleGuard)
   @Put("add-to-group")
   @ApiResponse({
     status: 201,
     description: "The record has been successfully created.",
   })
-  async addUserToGroup(@Body() userGroup: UserGroupDto) {
+  async addUsersToGroup(@Body() userGroup: UserGroupDto) {
     const { group_id, user_ids } = userGroup;
-    await this.addUserToGroupUseCaseProxy
+    await this.addUsersToGroupUseCaseProxy
       .getInstance()
       .execute(group_id, user_ids);
   }
