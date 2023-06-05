@@ -20,7 +20,7 @@ import { UserPresenter } from "./admin.presenter";
 import { UserDto, UserGroupDto } from "./admin.dto";
 import { createAdminUseCases } from "../../../usecases/admin/createAdmin.usecases";
 import { RoleGuard } from "src/infrastructure/common/guards/role.guard";
-import { Role } from "src/enums/role.enum";
+import { Role } from "@prisma/client";
 import { Roles } from "src/infrastructure/common/guards/role.decorator";
 
 @Controller("admin")
@@ -34,12 +34,12 @@ export class AdminController {
     @Inject(UsecasesProxyModule.CREATE_ADMIN_USECASES_PROXY)
     private readonly createUserGroupUseCaseProxy: UseCaseProxy<createUserGroupUseCases>,
     @Inject(UsecasesProxyModule.CREATE_ADMIN_USECASES_PROXY)
-    private readonly addUserToGroupUseCaseProxy: UseCaseProxy<addUserToGroupUseCases>
+    private readonly addUsersToGroupUseCaseProxy: UseCaseProxy<addUserToGroupUseCases>
   ) {}
 
-  @Roles(Role.SuperAdmin)
+  @Roles(Role.SUPER_ADMIN)
   @UseGuards(RoleGuard)
-  @Post("create-admin")
+  @Post("create")
   @ApiResponseType(UserPresenter, true)
   @ApiResponse({
     status: 201,
@@ -49,29 +49,37 @@ export class AdminController {
     const { username, password, email, role } = user;
     await this.createAdminUsecaseProxy
       .getInstance()
-      .execute(username, password, email, role);
+      .execute(username, password, email);
   }
 
+  @Roles(Role.SUPER_ADMIN)
+  @UseGuards(RoleGuard)
   @Post("create-group")
+  @ApiResponseType(UserPresenter, true)
   @ApiResponse({
     status: 201,
     description: "The record has been successfully created.",
   })
-  async createUserGroup(@Query("group_name") group_name: string) {
+  async createUserGroup(
+    @Query("group_name") group_name: string,
+    @Query("admin") admin: number
+  ) {
     const group_id = await this.createUserGroupUseCaseProxy
       .getInstance()
-      .execute(group_name);
+      .execute(group_name, admin);
     return group_id;
   }
 
+  @Roles(Role.SUPER_ADMIN)
+  @UseGuards(RoleGuard)
   @Put("add-to-group")
   @ApiResponse({
     status: 201,
     description: "The record has been successfully created.",
   })
-  async addUserToGroup(@Body() userGroup: UserGroupDto) {
+  async addUsersToGroup(@Body() userGroup: UserGroupDto) {
     const { group_id, user_ids } = userGroup;
-    await this.addUserToGroupUseCaseProxy
+    await this.addUsersToGroupUseCaseProxy
       .getInstance()
       .execute(group_id, user_ids);
   }

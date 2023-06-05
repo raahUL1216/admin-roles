@@ -1,4 +1,4 @@
-import { Role } from "../../enums/role.enum";
+import { Role } from "@prisma/client";
 
 export class UserWithoutPassword {
   id!: number;
@@ -10,8 +10,16 @@ export class UserWithoutPassword {
   updatedDate!: Date;
   lastLogin!: Date;
   hashRefreshToken!: string;
+
+  constructor(user: Partial<UserM>) {
+    Object.assign(this, user);
+  }
 }
 
 export class UserM extends UserWithoutPassword {
   password: string;
+
+  constructor(user: Partial<UserM>) {
+    super(user);
+  }
 }

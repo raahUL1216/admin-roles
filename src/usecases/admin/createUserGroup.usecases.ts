@@ -1,9 +1,9 @@
-import { AdminRepository } from "../../domain/repositories/adminRepository.interface";
+import { GroupRepository } from "src/domain/repositories/groupRepositary.interface";
 
 export class createUserGroupUseCases {
-  constructor(private readonly adminRepository: AdminRepository) {}
+  constructor(private readonly groupRepository: GroupRepository) {}
 
-  async execute(group_name): Promise<void> {
-    this.adminRepository.createUserGroup(group_name);
+  async execute(group_name: string, admin_id: number): Promise<void> {
+    this.groupRepository.add(group_name, admin_id);
   }
 }

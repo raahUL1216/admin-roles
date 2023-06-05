@@ -1,19 +1,23 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { TypeOrmConfigModule } from '../config/typeorm/typeorm.module';
+import { Module } from "@nestjs/common";
 import { DatabaseAdminRepository } from "./admin.repository";
-import { User } from "../entities/user.entity";
-import { Group } from "../entities/group.entity";
 import { DatabaseUserRepository } from "./user.repository";
-import { Auth } from "../entities/auth.entity";
-import { RolePermission } from "../entities/role-permission.entity";
+import { DatabaseGroupRepository } from "./group.repository";
+import { DatabaseUserGroupRepository } from "./user-group.repository";
+import { PrismaModule } from "../services/prisma/prisma.module";
 
 @Module({
-  imports: [
-    TypeOrmConfigModule,
-    TypeOrmModule.forFeature([Auth, User, Group, RolePermission]),
+  imports: [PrismaModule],
+  providers: [
+    DatabaseAdminRepository,
+    DatabaseUserRepository,
+    DatabaseGroupRepository,
+    DatabaseUserGroupRepository,
   ],
-  providers: [DatabaseAdminRepository, DatabaseUserRepository],
-  exports: [DatabaseAdminRepository, DatabaseUserRepository],
+  exports: [
+    DatabaseAdminRepository,
+    DatabaseUserRepository,
+    DatabaseGroupRepository,
+    DatabaseUserGroupRepository,
+  ],
 })
 export class RepositoriesModule {}
