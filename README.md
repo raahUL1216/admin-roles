@@ -32,7 +32,7 @@ yarn prisma migrate dev --name ${migration_name}
 
 # reset migration (may cause data loss)
 yarn prisma migrate reset --preview-feature
-```
+``` 
 
 ## App
 https://admin-roles-app.netlify.app
