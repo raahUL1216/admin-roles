@@ -1,22 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from "typeorm";
+
 import { AdminRepository } from "../../domain/repositories/adminRepository.interface";
-import { User } from "../entities/user.entity";
-import { Role } from "../../enums/role.enum";
-import { UserM } from "src/domain/model/user";
+import { Role, User } from "@prisma/client";
+import { PrismaService } from "../services/prisma/prisma.service";
 
 @Injectable()
 export class DatabaseAdminRepository implements AdminRepository {
-  constructor(
-    @InjectRepository(User)
-    private readonly adminEntityRepository: Repository<User>
-  ) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
-  async add(user: UserM): Promise<void> {
-    const adminUser = new User(user);
-    adminUser.role = Role.Admin;
-
-    await this.adminEntityRepository.insert(adminUser);
+  async add(user: User): Promise<void> {
+    await this.prismaService.user.create({
+      data: {
+        ...user,
+        role: Role.ADMIN,
+      },
+    });
   }
 }

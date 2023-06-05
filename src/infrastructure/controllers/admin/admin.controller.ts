@@ -20,7 +20,7 @@ import { UserPresenter } from "./admin.presenter";
 import { UserDto, UserGroupDto } from "./admin.dto";
 import { createAdminUseCases } from "../../../usecases/admin/createAdmin.usecases";
 import { RoleGuard } from "src/infrastructure/common/guards/role.guard";
-import { Role } from "src/enums/role.enum";
+import { Role } from "@prisma/client";
 import { Roles } from "src/infrastructure/common/guards/role.decorator";
 
 @Controller("admin")
@@ -37,7 +37,7 @@ export class AdminController {
     private readonly addUsersToGroupUseCaseProxy: UseCaseProxy<addUserToGroupUseCases>
   ) {}
 
-  @Roles(Role.SuperAdmin)
+  @Roles(Role.SUPER_ADMIN)
   @UseGuards(RoleGuard)
   @Post("create")
   @ApiResponseType(UserPresenter, true)
@@ -49,10 +49,10 @@ export class AdminController {
     const { username, password, email, role } = user;
     await this.createAdminUsecaseProxy
       .getInstance()
-      .execute(username, password, email, role);
+      .execute(username, password, email);
   }
 
-  @Roles(Role.SuperAdmin)
+  @Roles(Role.SUPER_ADMIN)
   @UseGuards(RoleGuard)
   @Post("create-group")
   @ApiResponseType(UserPresenter, true)
@@ -60,14 +60,17 @@ export class AdminController {
     status: 201,
     description: "The record has been successfully created.",
   })
-  async createUserGroup(@Query("group_name") group_name: string) {
+  async createUserGroup(
+    @Query("group_name") group_name: string,
+    @Query("admin") admin: number
+  ) {
     const group_id = await this.createUserGroupUseCaseProxy
       .getInstance()
-      .execute(group_name);
+      .execute(group_name, admin);
     return group_id;
   }
 
-  @Roles(Role.SuperAdmin)
+  @Roles(Role.SUPER_ADMIN)
   @UseGuards(RoleGuard)
   @Put("add-to-group")
   @ApiResponse({

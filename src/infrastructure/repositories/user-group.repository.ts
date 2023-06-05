@@ -1,21 +1,17 @@
 import { Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
 
-import { UserGroup } from "../entities/user-group.entity";
 import { UserGroupRepository } from "src/domain/repositories/userGroupRepositary.interface";
+import { PrismaService } from "../services/prisma/prisma.service";
 
 @Injectable()
 export class DatabaseUserGroupRepository implements UserGroupRepository {
-  constructor(
-    @InjectRepository(UserGroup)
-    private readonly userGroupEntityRepository: Repository<UserGroup>
-  ) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
   async addUserToGroup(group_id: number, user_id: number): Promise<void> {
-    await this.userGroupEntityRepository.insert({
-      group_id,
-      user_id,
+    const userGroup = { user_id, group_id };
+
+    await this.prismaService.userGroup.create({
+      data: userGroup,
     });
   }
 }

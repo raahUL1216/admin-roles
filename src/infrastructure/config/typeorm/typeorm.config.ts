@@ -3,7 +3,7 @@ import { join } from "path";
 import { DataSource } from "typeorm";
 
 if (process.env.NODE_ENV === "local") {
-  dotenv.config({ path: "./src/env/local.env" });
+  dotenv.config({ path: "./src/infrastructure/config/prisma/.env" });
 }
 
 export const AdminDataSource = new DataSource({

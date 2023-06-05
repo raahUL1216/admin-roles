@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import { IsEmail, IsNotEmpty, Length } from "class-validator";
-import { Role } from "../../enums/role.enum";
+import { Role } from "@prisma/client";
 import { Group } from "./group.entity";
 
 @Entity({ name: "users" })
@@ -42,7 +42,7 @@ export class User {
   @Column({
     type: "enum",
     enum: Role,
-    default: Role.User,
+    default: Role.USER,
   })
   role!: Role;
 

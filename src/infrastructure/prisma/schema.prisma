@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs https//pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+  directUrl         = env("DIRECT_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  USER
+  POWER_USER
+  SUPPORT
+}
+
+// model starts here
+model User {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  password String
+  email    String @unique
+  role     Role   @default(USER)
+
+  user_transactions UserTransaction[]
+  users             UserGroup[]
+
+  created_at DateTime? @default(now())
+  Group      Group?
+
+  @@index([username])
+  @@index([email])
+  @@map("users")
+}
+
+model Group {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  group_admin_id Int  @unique
+  admin          User @relation(fields: [group_admin_id], references: [id])
+
+  users UserGroup[]
+
+  @@index([name])
+  @@index([group_admin_id])
+  @@map("groups")
+}
+
+model UserGroup {
+  id       Int   @id @default(autoincrement())
+  user_id  Int
+  group_id Int
+  user     User  @relation(fields: [user_id], references: [id])
+  group    Group @relation(fields: [group_id], references: [id])
+
+  @@unique([user_id, group_id])
+  @@map("user_groups")
+}
+
+model UserTransaction {
+  id   Int    @id @default(autoincrement())
+  text String
+
+  user_id Int
+  author  User @relation(fields: [user_id], references: [id])
+
+  created_at DateTime? @default(now())
+
+  @@map("user_transactions")
+}
+
+model Permission {
+  id          Int    @id @default(autoincrement())
+  name        String @unique
+  description String
+
+  role_permissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  id   Int  @id @default(autoincrement())
+  role Role
+
+  permission_id Int
+  permission    Permission @relation(fields: [permission_id], references: [id])
+
+  @@unique([role, permission_id])
+  @@map("role_permissions")
+}

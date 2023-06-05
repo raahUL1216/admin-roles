@@ -14,7 +14,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     @Inject(UsecasesProxyModule.LOGIN_USECASES_PROXY)
     private readonly loginUsecaseProxy: UseCaseProxy<LoginUseCases>,
     private readonly logger: LoggerService,
-    private readonly exceptionService: ExceptionsService,
+    private readonly exceptionService: ExceptionsService
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
@@ -26,12 +26,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any) {
-    const user = this.loginUsecaseProxy.getInstance().validateUserForJWTStragtegy(payload.username);
-    if (!user) {
-      this.logger.warn('JwtStrategy', `User not found`);
-      this.exceptionService.UnauthorizedException({ message: 'User not found' });
-    }
-    return user;
-  }
+  //   async validate(payload: any) {
+  //     const user = this.loginUsecaseProxy.getInstance().validateUserForJWTStragtegy(payload.username);
+  //     if (!user) {
+  //       this.logger.warn('JwtStrategy', `User not found`);
+  //       this.exceptionService.UnauthorizedException({ message: 'User not found' });
+  //     }
+  //     return user;
+  //   }
 }
