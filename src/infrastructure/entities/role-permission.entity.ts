@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 import { Permission } from "../../enums/permission.enum";
-import { Role } from "../../enums/role.enum";
+import { Role } from "@prisma/client";
 import { FunctionName } from "../../enums/functionName.enum";
 
 @Entity()

@@ -1,5 +1,4 @@
-import * as Reflect from "reflect-metadata";
-import AdminDataSource from "./infrastructure/config/typeorm/typeorm.config";
+import "reflect-metadata";
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
@@ -12,6 +11,15 @@ import {
   ResponseInterceptor,
 } from "./infrastructure/common/interceptors/response.interceptor";
 import { LoggerService } from "./infrastructure/logger/logger.service";
+
+import { Prisma, PrismaClient, Role } from "@prisma/client";
+import { PrismaService } from "./infrastructure/services/prisma/prisma.service";
+
+let prisma: PrismaClient<
+  Prisma.PrismaClientOptions,
+  never,
+  Prisma.RejectOnNotFound | Prisma.RejectPerOperation
+>;
 
 async function bootstrap() {
   const env = process.env.NODE_ENV;
@@ -50,15 +58,15 @@ async function bootstrap() {
   await app.listen(3000);
 
   try {
-    await AdminDataSource.initialize();
+    const prismaService = app.get(PrismaService);
+    await prismaService.enableShutdownHooks(app);
   } catch (err) {
-    console.log("abc");
     console.log(err);
-    console.log("abc");
   }
 }
 
-bootstrap().catch((err) => {
+bootstrap().catch(async (err) => {
   console.error(err);
+  await prisma.$disconnect();
   process.exit(1);
 });

@@ -1,4 +1,4 @@
-import { Role } from "../../enums/role.enum";
+import { Role } from "@prisma/client";
 
 export class UserWithoutPassword {
   id!: number;

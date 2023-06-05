@@ -1,6 +1,6 @@
-import { UserM } from "src/domain/model/user";
 import { AdminRepository } from "../../domain/repositories/adminRepository.interface";
-import { Role } from "../../enums/role.enum";
+import { PrismaService } from "src/infrastructure/services/prisma/prisma.service";
+import { Role } from "@prisma/client";
 
 export class createAdminUseCases {
   constructor(private readonly adminRepository: AdminRepository) {}
@@ -8,13 +8,15 @@ export class createAdminUseCases {
   async execute(
     username: string,
     password: string,
-    email: string,
-    role: Role
+    email: string
   ): Promise<void> {
-    const adminUser = new UserM({ username, password, email, role });
-
-    adminUser.role = Role.Admin;
-
-    this.adminRepository.add(adminUser);
+    // this.prismaService.user.create({
+    //   data: {
+    //     username,
+    //     password,
+    //     email,
+    //     role: Role.ADMIN,
+    //   },
+    // });
   }
 }
