@@ -1,5 +1,5 @@
-import { User } from "@prisma/client";
+import { UserM } from "../model/user";
 
 export interface AdminRepository {
-  add(user: User): Promise<void>;
+  create(user: UserM): Promise<void>;
 }

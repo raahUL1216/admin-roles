@@ -1,5 +1,10 @@
+import { Role } from "@prisma/client";
+import { JWTToken } from "../model/auth";
+
 export interface IJwtServicePayload {
+  sub: number;
   username: string;
+  role: Role;
 }
 
 export interface IJwtService {
@@ -11,5 +16,8 @@ export interface IJwtService {
     expiresIn: string
   ): Promise<string>;
 
-  generateJWTToken(payload: IJwtServicePayload): Promise<string>;
+  generateJWT(
+    payload: IJwtServicePayload,
+    expiresIn: number
+  ): Promise<JWTToken>;
 }

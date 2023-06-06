@@ -1,8 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsArray, IsNotEmpty, IsNumber, IsString } from "class-validator";
 import { Role } from "@prisma/client";
 
-export class UserDto {
+export class AdminDto {
   @ApiProperty({ required: true })
   @IsNotEmpty()
   @IsString()
@@ -11,27 +11,29 @@ export class UserDto {
   @ApiProperty({ required: true })
   @IsNotEmpty()
   @IsString()
-  readonly password: string;
+  readonly email: string;
+}
 
+export class GroupDTO {
   @ApiProperty({ required: true })
   @IsNotEmpty()
   @IsString()
-  readonly email: string;
+  readonly name: string;
 
   @ApiProperty({ required: true })
   @IsNotEmpty()
   @IsNumber()
-  readonly role: Role;
+  readonly admin: number;
 }
 
 export class UserGroupDto {
   @ApiProperty({ required: true })
   @IsNotEmpty()
-  @IsString()
+  @IsNumber()
   readonly group_id: number;
 
   @ApiProperty({ required: true })
   @IsNotEmpty()
-  @IsString()
+  @IsArray()
   readonly user_ids: number[];
 }

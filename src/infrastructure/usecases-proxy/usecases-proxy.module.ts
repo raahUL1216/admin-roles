@@ -1,3 +1,4 @@
+import { BcryptService } from "./../services/bcrypt/bcrypt.service";
 import { DynamicModule, Module } from "@nestjs/common";
 import { LoginUseCases } from "../../usecases/auth/login.usecases";
 
@@ -18,10 +19,13 @@ import { DatabaseUserGroupRepository } from "../repositories/user-group.reposito
 import { DatabaseGroupRepository } from "../repositories/group.repository";
 import { AuthModule } from "../services/auth/auth.module";
 import { JwtTokenService } from "../services/jwt/jwt.service";
-import { JwtModule } from "@nestjs/jwt";
+import { createUserUseCases } from "src/usecases/user/createUser.usecases";
+import { UserService } from "../services/user/user.service";
+import { updatePasswordUseCases } from "src/usecases/user/updatePassword.usecases";
+import { UserModule } from "../services/user/user.module";
 
 @Module({
-  imports: [LoggerModule, AuthModule, RepositoriesModule],
+  imports: [LoggerModule, AuthModule, UserModule, RepositoriesModule],
 })
 export class UsecasesProxyModule {
   // Auth
@@ -33,27 +37,44 @@ export class UsecasesProxyModule {
   static CREATE_ADMIN__GROUP_USECASES_PROXY = "createAdminGroupUsecasesProxy";
   static ADD_USER_TO_GROUP_USECASES_PROXY = "addUserToGroupUsecasesProxy";
 
+  static CREATE_USER_USECASES_PROXY = "createUserUsecasesProxy";
+  static UPDATE_PASSWORD_USECASES_PROXY = "updatePasswordUsecasesProxy";
+
   static register(): DynamicModule {
     return {
       module: UsecasesProxyModule,
       providers: [
         {
-          inject: [LoggerService, DatabaseUserRepository, JwtTokenService],
+          inject: [
+            LoggerService,
+            DatabaseUserRepository,
+            JwtTokenService,
+            BcryptService,
+          ],
           provide: UsecasesProxyModule.LOGIN_USECASES_PROXY,
           useFactory: (
             logger: LoggerService,
             userRepo: DatabaseUserRepository,
-            jwtTokenService: JwtTokenService
+            jwtTokenService: JwtTokenService,
+            bcryptService: BcryptService
           ) =>
             new UseCaseProxy(
-              new LoginUseCases(logger, userRepo, jwtTokenService)
+              new LoginUseCases(
+                logger,
+                userRepo,
+                jwtTokenService,
+                bcryptService
+              )
             ),
         },
         {
-          inject: [DatabaseAdminRepository],
+          inject: [DatabaseAdminRepository, BcryptService],
           provide: UsecasesProxyModule.CREATE_ADMIN_USECASES_PROXY,
-          useFactory: (adminRepo: DatabaseAdminRepository) =>
-            new UseCaseProxy(new createAdminUseCases(adminRepo)),
+          useFactory: (
+            adminRepo: DatabaseAdminRepository,
+            bcryptService: BcryptService
+          ) =>
+            new UseCaseProxy(new createAdminUseCases(adminRepo, bcryptService)),
         },
         {
           inject: [DatabaseGroupRepository],
@@ -67,12 +88,32 @@ export class UsecasesProxyModule {
           useFactory: (userGroupRepo: DatabaseUserGroupRepository) =>
             new UseCaseProxy(new addUserToGroupUseCases(userGroupRepo)),
         },
+        {
+          inject: [DatabaseUserRepository, BcryptService, UserService],
+          provide: UsecasesProxyModule.CREATE_USER_USECASES_PROXY,
+          useFactory: (
+            userRepo: DatabaseUserRepository,
+            bcryptService: BcryptService,
+            userService: UserService
+          ) =>
+            new UseCaseProxy(
+              new createUserUseCases(userRepo, bcryptService, userService)
+            ),
+        },
+        {
+          inject: [UserService],
+          provide: UsecasesProxyModule.UPDATE_PASSWORD_USECASES_PROXY,
+          useFactory: (userService: UserService) =>
+            new UseCaseProxy(new updatePasswordUseCases(userService)),
+        },
       ],
       exports: [
         UsecasesProxyModule.LOGIN_USECASES_PROXY,
         UsecasesProxyModule.CREATE_ADMIN_USECASES_PROXY,
         UsecasesProxyModule.CREATE_ADMIN__GROUP_USECASES_PROXY,
         UsecasesProxyModule.ADD_USER_TO_GROUP_USECASES_PROXY,
+        UsecasesProxyModule.CREATE_USER_USECASES_PROXY,
+        UsecasesProxyModule.UPDATE_PASSWORD_USECASES_PROXY,
       ],
     };
   }

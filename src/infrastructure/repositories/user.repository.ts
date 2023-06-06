@@ -1,28 +1,48 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from "@nestjs/typeorm";
+import { Injectable } from "@nestjs/common";
 import { UserRepository } from "../../domain/repositories/userRepositary.interface";
 import { UserM } from "../../domain/model/user";
-import { Role, User } from "@prisma/client";
 import { PrismaService } from "../services/prisma/prisma.service";
 
 @Injectable()
 export class DatabaseUserRepository implements UserRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getUserByUsername(username: string): Promise<User> {
-    return this.prismaService.user.findUniqueOrThrow({
+  async getUserByUsername(username: string): Promise<UserM> {
+    const user = await this.prismaService.user.findUnique({
       where: {
         username,
       },
     });
+
+    return new UserM(user);
   }
 
-  //   async add(user: UserM): Promise<void> {
-  //     const cUser = new User(user);
-  //     cUser.role = Role.USER;
+  async getUserByEmail(email: string): Promise<UserM> {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        email,
+      },
+    });
 
-  //     await this.userEntityRepository.insert(cUser);
-  //   }
+    return new UserM(user);
+  }
+
+  async create(user: UserM): Promise<void> {
+    await this.prismaService.user.create({
+      data: {
+        ...user,
+      },
+    });
+  }
+
+  async updatePassword(username: string, password: string): Promise<void> {
+    await this.prismaService.user.update({
+      where: { username },
+      data: {
+        password,
+      },
+    });
+  }
 
   //   async updateRefreshToken(
   //     username: string,
