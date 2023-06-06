@@ -5,6 +5,7 @@ import {
   IJwtService,
   IJwtServicePayload,
 } from "../../../domain/adapters/jwt.interface";
+import { JWTToken } from "src/domain/model/auth";
 
 @Injectable()
 export class JwtTokenService implements IJwtService {
@@ -14,8 +15,7 @@ export class JwtTokenService implements IJwtService {
   ) {}
 
   async checkToken(token: string): Promise<any> {
-    const decode = await this.jwtService.verifyAsync(token);
-    return decode;
+    return this.jwtService.verifyAsync(token);
   }
 
   async createToken(
@@ -29,12 +29,20 @@ export class JwtTokenService implements IJwtService {
     });
   }
 
-  async generateJWTToken(payload: IJwtServicePayload): Promise<string> {
+  async generateJWT(
+    payload: IJwtServicePayload,
+    expiresInSec?: number
+  ): Promise<JWTToken> {
     const secret = this.envConfigService.getJwtSecret();
-    const expiresIn = this.envConfigService.getJwtExpirationTime() + "s";
+    const expiresIn =
+      expiresInSec?.toString() ||
+      this.envConfigService.getJwtExpirationTime() + "s";
 
-    const token = await this.createToken(payload, secret, expiresIn);
+    const jwt = await this.createToken(payload, secret, expiresIn);
 
-    return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.envConfigService.getJwtExpirationTime()}`;
+    return {
+      token: jwt,
+      expiresIn,
+    };
   }
 }

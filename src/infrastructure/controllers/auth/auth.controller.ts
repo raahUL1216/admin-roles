@@ -4,16 +4,10 @@ import {
   Inject,
   Post,
   Request,
+  Response,
   UseGuards,
 } from "@nestjs/common";
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiExtraModels,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from "@nestjs/swagger";
+import { ApiBody, ApiExtraModels, ApiResponse, ApiTags } from "@nestjs/swagger";
 
 import { AuthLoginDto } from "./auth-dto.class";
 import { IsAuthPresenter } from "./auth.presenter";
@@ -23,6 +17,8 @@ import { LoginGuard } from "../../common/guards/login.guard";
 import { UseCaseProxy } from "../../usecases-proxy/usecases-proxy";
 import { UsecasesProxyModule } from "../../usecases-proxy/usecases-proxy.module";
 import { LoginUseCases } from "../../../usecases/auth/login.usecases";
+import { Public } from "src/infrastructure/common/guards/public.decorator";
+import { JWTToken } from "src/domain/model/auth";
 
 @Controller("auth")
 @ApiTags("auth")
@@ -38,32 +34,19 @@ export class AuthController {
     private readonly loginUsecaseProxy: UseCaseProxy<LoginUseCases>
   ) {}
 
-  @Post("login")
+  @Public()
   @UseGuards(LoginGuard)
-  @ApiBearerAuth()
+  @Post("login")
   @ApiBody({ type: AuthLoginDto })
-  @ApiOperation({ description: "login" })
-  async login(@Body() auth: AuthLoginDto, @Request() request: any) {
-    const accessTokenCookie = await this.loginUsecaseProxy
+  async login(@Request() req, @Response() res) {
+    const { token }: JWTToken = await this.loginUsecaseProxy
       .getInstance()
-      .signIn(auth.username, auth.password);
+      .getAccessToken(req.user);
 
-    request.res.setHeader("Set-Cookie", accessTokenCookie);
-    return "Login successful";
+    res.set("Authorization", "Bearer " + token);
+    res.send({
+      success: true,
+      token,
+    });
   }
-
-  /*
-  @Post("create-user")
-  @ApiResponseType(UserPresenter, true)
-  @ApiResponse({
-    status: 201,
-    description: "The record has been successfully created.",
-  })
-  async createUser(@Body() user: UserDto) {
-    const { username, password, email, role } = user;
-    await this.createAdminUsecaseProxy
-      .getInstance()
-      .execute(username, password, email, role);
-  }
-  */
 }

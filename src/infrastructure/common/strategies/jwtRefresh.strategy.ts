@@ -33,13 +33,17 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(
     });
   }
 
-  //   async validate(request: Request, payload: TokenPayload) {
-  //     const refreshToken = request.cookies?.Refresh;
-  //     const user = this.loginUsecaseProxy.getInstance().getUserIfRefreshTokenMatches(refreshToken, payload.username);
-  //     if (!user) {
-  //       this.logger.warn('JwtStrategy', `User not found or hash not correct`);
-  //       this.exceptionService.UnauthorizedException({ message: 'User not found or hash not correct' });
-  //     }
-  //     return user;
-  //   }
+  async validate(request: Request, payload: TokenPayload) {
+    const refreshToken = request.cookies?.Refresh;
+    const user = this.loginUsecaseProxy
+      .getInstance()
+      .getUserIfRefreshTokenMatches(refreshToken, payload.username);
+    if (!user) {
+      this.logger.warn("JwtStrategy", `User not found or hash not correct`);
+      this.exceptionService.UnauthorizedException({
+        message: "User not found or hash not correct",
+      });
+    }
+    return user;
+  }
 }

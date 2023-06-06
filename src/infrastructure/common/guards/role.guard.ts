@@ -1,7 +1,13 @@
-import { Injectable, CanActivate, ExecutionContext } from "@nestjs/common";
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  Global,
+} from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { Role } from "@prisma/client";
 
+@Global()
 @Injectable()
 export class RoleGuard implements CanActivate {
   constructor(private reflector: Reflector) {}

@@ -6,7 +6,6 @@ import { JwtModule } from "src/infrastructure/services/jwt/jwt.module";
 
 @Module({
   imports: [BcryptModule, JwtModule, PassportModule],
-  providers: [],
-  exports: [JwtModule],
+  exports: [BcryptModule, JwtModule, PassportModule],
 })
 export class AuthModule {}

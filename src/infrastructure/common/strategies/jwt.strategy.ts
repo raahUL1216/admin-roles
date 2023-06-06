@@ -7,6 +7,8 @@ import { UseCaseProxy } from '../../usecases-proxy/usecases-proxy';
 import { LoginUseCases } from '../../../usecases/auth/login.usecases';
 import { ExceptionsService } from '../../exceptions/exceptions.service';
 import { LoggerService } from '../../logger/logger.service';
+import { Reflector } from "@nestjs/core";
+import { IS_PUBLIC_KEY } from "../guards/public.decorator";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -14,7 +16,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     @Inject(UsecasesProxyModule.LOGIN_USECASES_PROXY)
     private readonly loginUsecaseProxy: UseCaseProxy<LoginUseCases>,
     private readonly logger: LoggerService,
-    private readonly exceptionService: ExceptionsService
+    private readonly exceptionService: ExceptionsService,
+    private reflector: Reflector
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
@@ -26,12 +29,26 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  //   async validate(payload: any) {
-  //     const user = this.loginUsecaseProxy.getInstance().validateUserForJWTStragtegy(payload.username);
-  //     if (!user) {
-  //       this.logger.warn('JwtStrategy', `User not found`);
-  //       this.exceptionService.UnauthorizedException({ message: 'User not found' });
-  //     }
-  //     return user;
-  //   }
+  async validate(payload, context) {
+    console.log("in validate Jwt. ", { payload, context });
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (isPublic) {
+      return true;
+    }
+
+    const user = this.loginUsecaseProxy
+      .getInstance()
+      .validateUserForJWTStragtegy(payload.username);
+    if (!user) {
+      this.logger.warn("JwtStrategy", `User not found`);
+      this.exceptionService.UnauthorizedException({
+        message: "User not found",
+      });
+    }
+    return user;
+  }
 }
