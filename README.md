@@ -14,7 +14,6 @@ $ yarn run start
 
 # watch mode
 $ yarn run start:dev
-```
 
 # production mode
 $ yarn run start:prod
@@ -26,13 +25,13 @@ $ yarn run start:prod
 $ yarn prisma generate
 
 # initial schema creation
-yarn prisma db push
+$ yarn prisma db push
 
 # generate migration files after schema update
-yarn prisma migrate dev --name ${migration_name}
+$ yarn prisma migrate dev --name ${migration_name}
 
 # reset migration (may cause data loss)
-yarn prisma migrate reset --preview-feature
+$ yarn prisma migrate reset --preview-feature
 ```
 
 ## App
